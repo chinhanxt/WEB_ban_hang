@@ -28,6 +28,16 @@ class OrderModel
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    // Lấy đơn hàng theo email
+    public function getOrdersByEmail($email)
+    {
+        $query = "SELECT * FROM orders WHERE Email = :email ORDER BY Created_at DESC";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':email', $email);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     // Lấy thông tin chi tiết một đơn hàng
     public function getOrderById($id)
     {

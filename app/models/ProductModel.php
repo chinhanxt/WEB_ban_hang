@@ -190,21 +190,4 @@ class ProductModel
 
         return $stmt->fetchAll(PDO::FETCH_OBJ);
     }
-
-    public function cart()
-    {
-        session_start();
-
-        $cart = $_SESSION['cart'] ?? [];
-
-        $products = [];
-
-        foreach ($cart as $id => $qty) {
-            $product = $this->productModel->getProductById($id);
-            $product->qty = $qty;
-            $products[] = $product;
-        }
-
-        include 'app/views/product/cart.php';
-    }
 }

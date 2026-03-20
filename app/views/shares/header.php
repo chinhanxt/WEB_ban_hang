@@ -1,8 +1,3 @@
-<?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-?>
 <!DOCTYPE html>
 <html lang="vi">
 
@@ -171,33 +166,55 @@ if (session_status() === PHP_SESSION_NONE) {
                     <li class="nav-item">
                         <a class="nav-link" href="/webbanhang/OrderController">Đơn hàng</a>
                     </li>
+                    <?php if (isLoggedIn()): ?>
                     <li class="nav-item">
                         <a class="nav-link" href="/webbanhang/OrderController/history">Lịch sử</a>
                     </li>
+                    <?php endif; ?>
+
+                    <?php if (isAdmin()): ?>
                     <li class="nav-item">
-                        <a class="nav-link" href="/webbanhang/ProductController/add">
+                        <a class="nav-link text-primary font-weight-bold" href="/webbanhang/AuthController/listAccounts">
+                            <i class="fas fa-users-cog mr-1"></i>Thành viên
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-primary font-weight-bold" href="/webbanhang/ProductController/add">
                             <i class="fa-solid fa-plus-circle mr-1"></i>Thêm SP
                         </a>
                     </li>
-                    
-                    <div class="search-container">
-                        <form class="form-inline" method="GET" action="/webbanhang/ProductController/search">
-                            <input class="form-control" type="search" name="keyword" placeholder="Tìm kiếm công nghệ...">
-                        </form>
-                    </div>
+                    <?php endif; ?>
 
-                    <li class="nav-item">
+                    <li class="nav-item mr-3">
                         <a class="nav-link p-0" href="/webbanhang/ProductController/cart">
                             <div class="cart-wrapper">
                                 <i class="fa-solid fa-cart-shopping" style="font-size: 1.2rem;"></i>
                                 <span id="cart-count" class="cart-badge">
-                                    <?php
-                                    echo (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) ? count($_SESSION['cart']) : 0;
-                                    ?>
+                                    <?php echo getCartItemCount(); ?>
                                 </span>
                             </div>
                         </a>
                     </li>
+
+                    <?php if (isLoggedIn()): ?>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle font-weight-bold" href="#" id="userDropdown" role="button" data-toggle="dropdown">
+                                <i class="fa-solid fa-user-circle mr-1"></i> <?php echo explode(' ', $_SESSION['user']->fullname)[0]; ?>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right shadow border-0" aria-labelledby="userDropdown">
+                                <a class="dropdown-item small" href="#"><i class="fas fa-id-card mr-2 text-muted"></i> Hồ sơ</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item small text-danger font-weight-bold" href="/webbanhang/AuthController/logout"><i class="fas fa-sign-out-alt mr-2"></i> Đăng xuất</a>
+                            </div>
+                        </li>
+                    <?php else: ?>
+                        <li class="nav-item">
+                            <a class="btn btn-outline-primary btn-sm mr-2" href="/webbanhang/AuthController/login">Đăng nhập</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-primary btn-sm" href="/webbanhang/AuthController/register">Đăng ký</a>
+                        </li>
+                    <?php endif; ?>
                 </ul>
             </div>
         </div>

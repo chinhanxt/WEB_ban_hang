@@ -17,7 +17,12 @@ class OrderController
     // Hiển thị danh sách đơn hàng
     public function index()
     {
-        $orders = $this->orderModel->getAllOrders();
+        requireLogin();
+        if (isAdmin()) {
+            $orders = $this->orderModel->getAllOrders();
+        } else {
+            $orders = $this->orderModel->getOrdersByEmail($_SESSION['user']->email);
+        }
         include 'app/views/order/list.php';
     }
 
@@ -36,7 +41,6 @@ class OrderController
     // Xem chi tiết đơn hàng
     public function viewDetails($id)
     {
-        session_start();
         $order = $this->orderModel->getOrderById($id);
         if (!$order) {
             $_SESSION['flash_message'] = [
@@ -54,7 +58,7 @@ class OrderController
     // Cập nhật trạng thái đơn hàng
     public function updateStatus()
     {
-        session_start();
+        requireAdmin();
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $id = $_POST['id'];
             $status = $_POST['status'];
@@ -72,7 +76,7 @@ class OrderController
     // Xóa đơn hàng
     public function delete($id)
     {
-        session_start();
+        requireAdmin();
         $this->orderModel->deleteOrder($id);
         $_SESSION['flash_message'] = [
             'type' => 'success',

@@ -51,6 +51,7 @@
             </div>
         </div>
 
+        <?php if (isAdmin()): ?>
         <div class="admin-controls bg-light p-3 rounded d-flex align-items-center justify-content-between">
             <span class="small text-muted font-weight-bold">Quản trị viên:</span>
             <div>
@@ -62,6 +63,7 @@
                 </a>
             </div>
         </div>
+        <?php endif; ?>
 
     </div>
 
@@ -72,6 +74,22 @@
         fetch("/webbanhang/ProductController/addToCartAjax/" + id)
             .then(res => res.json())
             .then(data => {
+                if (data.status === 'error') {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Yêu cầu đăng nhập',
+                        text: data.message,
+                        showCancelButton: true,
+                        confirmButtonText: 'Đăng nhập ngay',
+                        cancelButtonText: 'Để sau'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = '/webbanhang/AuthController/login';
+                        }
+                    });
+                    return;
+                }
+
                 document.getElementById("cart-count").innerText = data.count;
                 
                 const Toast = Swal.mixin({

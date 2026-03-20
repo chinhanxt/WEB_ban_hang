@@ -1,4 +1,5 @@
 <?php
+require_once 'app/config/auth.php';
 
 $url = $_GET['url'] ?? '';
 

@@ -3,12 +3,21 @@
 <h1 class="mb-4">Khám phá Sản phẩm</h1>
 
 <!-- Bộ lọc sản phẩm -->
-<div class="card mb-5 border-0" style="background: #fff; border-radius: 20px;">
-    <div class="card-body p-4">
-        <form method="GET" action="/webbanhang/ProductController" class="row align-items-end">
+<div class="card mb-4 border-0 shadow-sm" style="background: #fff; border-radius: 15px;">
+    <div class="card-body p-3">
+        <form method="GET" action="/webbanhang/ProductController" class="row align-items-end gx-2">
             <div class="col-md-3">
-                <label class="small font-weight-bold text-muted mb-2 text-uppercase">Danh mục</label>
-                <select name="category_id" class="form-control border-0 bg-light" style="border-radius: 12px; height: 45px;">
+                <label class="small font-weight-bold text-muted mb-1 text-uppercase" style="font-size: 0.7rem;">Tìm kiếm</label>
+                <div class="input-group input-group-sm">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text bg-light border-0" style="border-radius: 8px 0 0 8px;"><i class="fa fa-search text-primary small"></i></span>
+                    </div>
+                    <input type="text" name="keyword" class="form-control border-0 bg-light" style="border-radius: 0 8px 8px 0; height: 35px; font-size: 0.85rem;" value="<?php echo $_GET['keyword'] ?? ''; ?>" placeholder="Sản phẩm...">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <label class="small font-weight-bold text-muted mb-1 text-uppercase" style="font-size: 0.7rem;">Danh mục</label>
+                <select name="category_id" class="form-control form-control-sm border-0 bg-light" style="border-radius: 8px; height: 35px; font-size: 0.85rem;">
                     <option value="">Tất cả</option>
                     <?php foreach ($categories as $cat): ?>
                         <option value="<?php echo $cat->id; ?>" <?php echo (isset($_GET['category_id']) && $_GET['category_id'] == $cat->id) ? 'selected' : ''; ?>>
@@ -17,17 +26,17 @@
                     <?php endforeach; ?>
                 </select>
             </div>
-            <div class="col-md-3">
-                <label class="small font-weight-bold text-muted mb-2 text-uppercase">Giá tối thiểu</label>
-                <input type="number" name="min_price" class="form-control border-0 bg-light" style="border-radius: 12px; height: 45px;" value="<?php echo $_GET['min_price'] ?? ''; ?>" placeholder="0">
+            <div class="col-md-2">
+                <label class="small font-weight-bold text-muted mb-1 text-uppercase" style="font-size: 0.7rem;">Giá từ</label>
+                <input type="number" name="min_price" class="form-control form-control-sm border-0 bg-light" style="border-radius: 8px; height: 35px; font-size: 0.85rem;" value="<?php echo $_GET['min_price'] ?? ''; ?>" placeholder="0">
+            </div>
+            <div class="col-md-2">
+                <label class="small font-weight-bold text-muted mb-1 text-uppercase" style="font-size: 0.7rem;">Đến</label>
+                <input type="number" name="max_price" class="form-control form-control-sm border-0 bg-light" style="border-radius: 8px; height: 35px; font-size: 0.85rem;" value="<?php echo $_GET['max_price'] ?? ''; ?>" placeholder="Tối đa">
             </div>
             <div class="col-md-3">
-                <label class="small font-weight-bold text-muted mb-2 text-uppercase">Giá tối đa</label>
-                <input type="number" name="max_price" class="form-control border-0 bg-light" style="border-radius: 12px; height: 45px;" value="<?php echo $_GET['max_price'] ?? ''; ?>" placeholder="999,000,000">
-            </div>
-            <div class="col-md-3">
-                <button type="submit" class="btn btn-primary btn-block shadow-none" style="height: 45px; border-radius: 12px;">
-                    <i class="fa fa-filter mr-2"></i>Áp dụng lọc
+                <button type="submit" class="btn btn-primary btn-sm btn-block shadow-none font-weight-bold" style="height: 35px; border-radius: 8px; font-size: 0.85rem;">
+                    <i class="fa fa-filter mr-1"></i>TÌM & LỌC
                 </button>
             </div>
         </form>
@@ -36,9 +45,11 @@
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h4 class="m-0 font-weight-bold">Danh sách công nghệ</h4>
+    <?php if (isAdmin()): ?>
     <a href="/webbanhang/ProductController/add" class="btn btn-success" style="border-radius: 12px;">
         <i class="fa fa-plus-circle mr-2"></i>Thêm sản phẩm
     </a>
+    <?php endif; ?>
 </div>
 
 
@@ -89,6 +100,7 @@
                             </a>
                         </div>
                         
+                        <?php if (isAdmin()): ?>
                         <div class="mt-2 d-flex justify-content-center">
                             <a href="/webbanhang/ProductController/edit/<?php echo $product->Id; ?>" class="text-muted small mr-3" title="Chỉnh sửa">
                                 <i class="fa-solid fa-pen-to-square"></i> Sửa
@@ -98,6 +110,7 @@
                                 <i class="fa-solid fa-trash"></i> Xóa
                             </a>
                         </div>
+                        <?php endif; ?>
                     </div>
 
                 </div>
@@ -117,34 +130,7 @@
     </div>
 <?php endif; ?>
 
-<?php if (!isset($_GET['keyword'])): ?>
-    <nav class="mt-5">
-        <ul class="pagination justify-content-center">
-            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                <?php
-                    $queryParams = $_GET;
-                    $queryParams['page'] = $i;
-                    $queryString = http_build_query($queryParams);
-                ?>
-                <li class="page-item <?php echo (isset($_GET['page']) && $_GET['page'] == $i) || (!isset($_GET['page']) && $i == 1) ? 'active' : ''; ?>">
-                    <a class="page-link border-0 mx-1 shadow-sm" style="border-radius: 8px; font-weight: 600;" href="/webbanhang/ProductController?<?php echo $queryString; ?>">
-                        <?php echo $i; ?>
-                    </a>
-                </li>
-            <?php endfor; ?>
-        </ul>
-    </nav>
-<?php endif; ?>
-
 <style>
-    .page-item.active .page-link {
-        background-color: var(--primary-color) !important;
-        color: white !important;
-    }
-    .page-link {
-        color: var(--text-dark);
-        background: #fff;
-    }
     .card-title a:hover {
         color: var(--primary-color) !important;
     }
@@ -155,6 +141,22 @@
         fetch("/webbanhang/ProductController/addToCartAjax/" + id)
             .then(res => res.json())
             .then(data => {
+                if (data.status === 'error') {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Yêu cầu đăng nhập',
+                        text: data.message,
+                        showCancelButton: true,
+                        confirmButtonText: 'Đăng nhập ngay',
+                        cancelButtonText: 'Để sau'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = '/webbanhang/AuthController/login';
+                        }
+                    });
+                    return;
+                }
+
                 document.getElementById("cart-count").innerText = data.count;
                 
                 const Toast = Swal.mixin({

@@ -19,12 +19,13 @@ class CategoryController
     }
 
     public function add(){
+        requireAdmin();
         include 'app/views/category/add.php';
     }
 
     public function save(){
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            session_start();
+            requireAdmin();
             $name = trim($_POST['name']);
             $description = trim($_POST['description']);
             

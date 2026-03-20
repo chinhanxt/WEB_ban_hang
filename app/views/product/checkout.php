@@ -32,7 +32,7 @@
 
                 <div class="form-group mb-3">
                     <label class="small font-weight-bold text-muted">Họ và tên</label>
-                    <input type="text" name="name" class="form-control border-0 bg-light" style="height: 50px; border-radius: 10px;" required placeholder="Nhập họ và tên người nhận">
+                    <input type="text" name="name" class="form-control border-0 bg-light" style="height: 50px; border-radius: 10px;" required placeholder="Nhập họ và tên người nhận" value="<?php echo isLoggedIn() ? htmlspecialchars($_SESSION['user']->fullname) : ''; ?>">
                 </div>
 
                 <div class="row">
@@ -45,7 +45,7 @@
                     <div class="col-md-6">
                         <div class="form-group mb-3">
                             <label class="small font-weight-bold text-muted">Email (Không bắt buộc)</label>
-                            <input type="email" name="email" class="form-control border-0 bg-light" style="height: 50px; border-radius: 10px;" placeholder="example@gmail.com">
+                            <input type="email" name="email" class="form-control border-0 bg-light" style="height: 50px; border-radius: 10px;" placeholder="example@gmail.com" value="<?php echo isLoggedIn() ? htmlspecialchars($_SESSION['user']->email) : ''; ?>">
                         </div>
                     </div>
                 </div>

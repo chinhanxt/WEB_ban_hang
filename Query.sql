@@ -60,6 +60,20 @@ CREATE TABLE IF NOT EXISTS account
     Role ENUM('admin','user') DEFAULT 'user'
 );
 
+/* Tao bang giỏ hàng theo tài khoản: cart_items */
+CREATE TABLE IF NOT EXISTS cart_items
+(
+    Id INT AUTO_INCREMENT PRIMARY KEY,
+    Account_Id INT NOT NULL,
+    Product_Id INT NOT NULL,
+    Quantity INT NOT NULL DEFAULT 1,
+    Created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    Updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uniq_account_product (Account_Id, Product_Id),
+    FOREIGN KEY (Account_Id) REFERENCES account(Id) ON DELETE CASCADE,
+    FOREIGN KEY (Product_Id) REFERENCES product(Id) ON DELETE CASCADE
+);
+
 /* Them du lieu vao bang loai san pham (danh muc): category */
 INSERT INTO category(Name, Description) VALUES
 ('Điện thoại', 'Danh mục các loại điện thoại'),
