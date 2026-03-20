@@ -1,13 +1,14 @@
 <?php include 'app/views/shares/header.php'; ?>
 
-<div class="row justify-content-center mt-5 mb-5">
-    <div class="col-md-5">
-        <div class="card shadow-lg border-0 rounded-lg">
-            <div class="card-header bg-white text-center py-4">
-                <h3 class="font-weight-bold text-primary mb-0">ĐĂNG NHẬP</h3>
-                <p class="text-muted small mt-2">Chào mừng bạn quay trở lại với Tech Store</p>
+<div class="row justify-content-center mt-4 mb-5">
+    <div class="col-lg-6 col-xl-5">
+        <div class="surface-card reveal-up">
+            <div class="hero-banner text-center" style="border-radius: 0;">
+                <div class="section-kicker mx-auto"><i class="fa-solid fa-right-to-bracket"></i>Đăng nhập</div>
+                <h1 class="h3 font-weight-bold mt-3 mb-2 text-white">Quay lại tài khoản của bạn</h1>
+                <p class="text-white-50 mb-0">Bố cục được tối giản để bạn nhập thông tin nhanh và dễ đọc hơn.</p>
             </div>
-            <div class="card-body p-5">
+            <div class="card-body p-4 p-md-5">
                 <form id="loginForm" action="/webbanhang/AuthController/handleLogin" method="POST">
                     <div class="form-group mb-4">
                         <label for="email" class="font-weight-bold small text-uppercase">Email</label>
@@ -15,7 +16,7 @@
                             <div class="input-group-prepend">
                                 <span class="input-group-text bg-light border-0"><i class="fas fa-envelope text-primary"></i></span>
                             </div>
-                            <input type="text" name="email" id="email" class="form-control bg-light border-0" placeholder="example@gmail.com" value="<?php echo htmlspecialchars($_SESSION['old_input']['email'] ?? ''); ?>" required>
+                            <input type="text" name="email" id="email" class="form-control" placeholder="example@gmail.com" value="<?php echo htmlspecialchars($_SESSION['old_input']['email'] ?? ''); ?>" required>
                         </div>
                     </div>
 
@@ -25,7 +26,7 @@
                             <div class="input-group-prepend">
                                 <span class="input-group-text bg-light border-0"><i class="fas fa-lock text-primary"></i></span>
                             </div>
-                            <input type="password" name="password" id="password" class="form-control bg-light border-0" placeholder="••••••••" required>
+                            <input type="password" name="password" id="password" class="form-control" placeholder="••••••••" required>
                         </div>
                     </div>
 
@@ -37,12 +38,12 @@
                         <a href="#" class="small text-primary font-weight-bold">Quên mật khẩu?</a>
                     </div>
 
-                    <button type="submit" id="btnSubmit" class="btn btn-primary btn-block py-3 font-weight-bold shadow-sm">
+                    <button type="submit" id="btnSubmit" class="btn btn-primary btn-block py-3 font-weight-bold">
                         ĐĂNG NHẬP NGAY
                     </button>
                 </form>
             </div>
-            <div class="card-footer bg-light text-center py-3 border-0">
+            <div class="text-center py-4" style="background: rgba(248, 250, 252, 0.82);">
                 <p class="mb-0 small text-muted">Chưa có tài khoản? <a href="/webbanhang/AuthController/register" class="text-primary font-weight-bold">Đăng ký tại đây</a></p>
             </div>
         </div>

@@ -1,13 +1,14 @@
 <?php include 'app/views/shares/header.php'; ?>
 
-<div class="row justify-content-center mt-5 mb-5">
-    <div class="col-md-6">
-        <div class="card shadow-lg border-0 rounded-lg">
-            <div class="card-header bg-white text-center py-4">
-                <h3 class="font-weight-bold text-primary mb-0">TẠO TÀI KHOẢN</h3>
-                <p class="text-muted small mt-2">Trở thành thành viên của gia đình Tech Store</p>
+<div class="row justify-content-center mt-4 mb-5">
+    <div class="col-lg-7 col-xl-6">
+        <div class="surface-card reveal-up">
+            <div class="hero-banner text-center" style="border-radius: 0;">
+                <div class="section-kicker mx-auto"><i class="fa-solid fa-user-plus"></i>Tạo tài khoản</div>
+                <h1 class="h3 font-weight-bold mt-3 mb-2 text-white">Tham gia Tech Store</h1>
+                <p class="text-white-50 mb-0">Mọi trường thông tin được nhóm lại rõ ràng để giảm nhầm lẫn khi đăng ký.</p>
             </div>
-            <div class="card-body p-5">
+            <div class="card-body p-4 p-md-5">
                 <form id="registerForm" action="/webbanhang/AuthController/handleRegister" method="POST" autocomplete="off">
                     
                     <div class="form-group mb-4">
@@ -16,7 +17,7 @@
                             <div class="input-group-prepend">
                                 <span class="input-group-text bg-light border-0"><i class="fas fa-user text-primary"></i></span>
                             </div>
-                            <input type="text" name="fullname" id="fullname" class="form-control bg-light border-0" placeholder="Nguyễn Văn A" value="<?php echo htmlspecialchars($_SESSION['old_input']['fullname'] ?? ''); ?>" required autocomplete="new-password">
+                            <input type="text" name="fullname" id="fullname" class="form-control" placeholder="Nguyễn Văn A" value="<?php echo htmlspecialchars($_SESSION['old_input']['fullname'] ?? ''); ?>" required autocomplete="new-password">
                         </div>
                     </div>
 
@@ -26,7 +27,7 @@
                             <div class="input-group-prepend">
                                 <span class="input-group-text bg-light border-0"><i class="fas fa-at text-primary"></i></span>
                             </div>
-                            <input type="text" name="username" id="username" class="form-control bg-light border-0" placeholder="username12345" value="<?php echo htmlspecialchars($_SESSION['old_input']['username'] ?? ''); ?>" required autocomplete="new-password">
+                            <input type="text" name="username" id="username" class="form-control" placeholder="username12345" value="<?php echo htmlspecialchars($_SESSION['old_input']['username'] ?? ''); ?>" required autocomplete="new-password">
                         </div>
                         <small class="text-muted">Tối thiểu 10 ký tự.</small>
                     </div>
@@ -37,7 +38,7 @@
                             <div class="input-group-prepend">
                                 <span class="input-group-text bg-light border-0"><i class="fas fa-envelope text-primary"></i></span>
                             </div>
-                            <input type="text" name="email" id="email" class="form-control bg-light border-0" placeholder="vd: tung123 (tự thêm @gmail.com)" value="<?php echo htmlspecialchars($_SESSION['old_input']['email'] ?? ''); ?>" required autocomplete="new-password">
+                            <input type="text" name="email" id="email" class="form-control" placeholder="vd: tung123 (tự thêm @gmail.com)" value="<?php echo htmlspecialchars($_SESSION['old_input']['email'] ?? ''); ?>" required autocomplete="new-password">
                         </div>
                     </div>
 
@@ -47,7 +48,7 @@
                             <div class="input-group-prepend">
                                 <span class="input-group-text bg-light border-0"><i class="fas fa-lock text-primary"></i></span>
                             </div>
-                            <input type="password" name="password" id="password" class="form-control bg-light border-0" placeholder="••••••••" required autocomplete="new-password">
+                            <input type="password" name="password" id="password" class="form-control" placeholder="••••••••" required autocomplete="new-password">
                         </div>
                         <div class="mt-2" id="passwordRules">
                             <small class="d-block text-muted rule" id="rule-len"><i class="far fa-circle mr-1"></i>Ít nhất 8 ký tự</small>
@@ -56,12 +57,12 @@
                         </div>
                     </div>
 
-                    <button type="submit" id="btnSubmit" class="btn btn-primary btn-block py-3 font-weight-bold shadow-sm">
+                    <button type="submit" id="btnSubmit" class="btn btn-primary btn-block py-3 font-weight-bold">
                         ĐĂNG KÝ NGAY
                     </button>
                 </form>
             </div>
-            <div class="card-footer bg-light text-center py-3 border-0">
+            <div class="text-center py-4" style="background: rgba(248, 250, 252, 0.82);">
                 <p class="mb-0 small text-muted">Đã có tài khoản? <a href="/webbanhang/AuthController/login" class="text-primary font-weight-bold">Đăng nhập ngay</a></p>
             </div>
         </div>

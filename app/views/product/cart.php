@@ -1,14 +1,20 @@
 <?php include 'app/views/shares/header.php'; ?>
 
-<h2 class="mb-4 font-weight-bold" style="font-size: 1.5rem;"><i class="fa-solid fa-cart-shopping mr-2 text-primary"></i>GIỎ HÀNG CỦA BẠN</h2>
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-4 reveal-up">
+    <div>
+        <div class="section-kicker"><i class="fa-solid fa-cart-shopping"></i>Giỏ hàng</div>
+        <h1 class="section-title mb-2">Giỏ hàng của bạn</h1>
+        <p class="section-subtitle mb-0">Chọn sản phẩm muốn thanh toán, cập nhật số lượng trực tiếp và theo dõi tổng tiền rõ ràng.</p>
+    </div>
+</div>
 
 <form id="cart-form" action="/webbanhang/ProductController/checkout" method="POST">
-    <div class="card border-0 shadow-sm" style="border-radius: 15px;">
+    <div class="surface-card reveal-up stagger-1">
         <div class="card-body p-0">
             <?php if (!empty($products)): ?>
             <div class="table-responsive">
                 <table class="table mb-0 align-middle">
-                    <thead class="bg-light text-muted small text-uppercase" style="font-size: 0.75rem;">
+                    <thead>
                         <tr>
                             <th class="border-0 px-3 py-2" style="width: 40px;">
                                 <div class="custom-control custom-checkbox">
@@ -23,7 +29,7 @@
                             <th class="border-0 px-3 py-2 text-center"></th>
                         </tr>
                     </thead>
-                    <tbody style="font-size: 0.9rem;">
+                    <tbody style="font-size: 0.95rem;">
                         <?php
                         $total = 0;
                         foreach ($products as $p):
@@ -39,29 +45,32 @@
                                 <td class="py-3">
                                     <div class="d-flex align-items-center">
                                         <?php if (isset($p->Image)): ?>
-                                            <img src="/webbanhang/<?php echo $p->Image; ?>" class="rounded mr-2 border" style="width: 50px; height: 50px; object-fit: cover;">
+                                            <img src="/webbanhang/<?php echo $p->Image; ?>" class="rounded mr-3 border" style="width: 64px; height: 64px; object-fit: cover;">
                                         <?php endif; ?>
-                                        <h6 class="m-0 font-weight-bold" style="font-size: 0.95rem;"><?php echo htmlspecialchars($p->Name); ?></h6>
+                                        <div>
+                                            <h6 class="m-0 font-weight-bold" style="font-size: 1rem;"><?php echo htmlspecialchars($p->Name); ?></h6>
+                                            <small class="text-muted">Mã sản phẩm #<?php echo $p->Id; ?></small>
+                                        </div>
                                     </div>
                                 </td>
                                 <td class="py-3 text-center text-muted small"><?php echo number_format($p->Price); ?> <small>VND</small></td>
                                 <td class="py-3 text-center">
-                                    <div class="input-group input-group-sm mx-auto" style="width: 90px;">
+                                    <div class="input-group input-group-sm mx-auto" style="width: 112px;">
                                         <div class="input-group-prepend">
                                             <button class="btn btn-outline-secondary btn-qty-minus py-0 px-2" type="button" onclick="changeQty(<?php echo $p->Id; ?>, -1)">-</button>
                                         </div>
-                                        <input type="number" value="<?php echo $p->qty; ?>" min="1" class="form-control text-center border-0 bg-light font-weight-bold input-qty"
-                                            data-id="<?php echo $p->Id; ?>" onchange="updateCart(<?php echo $p->Id; ?>, this.value)" style="height: 30px; font-size: 0.9rem;">
+                                        <input type="number" value="<?php echo $p->qty; ?>" min="1" class="form-control text-center font-weight-bold input-qty"
+                                            data-id="<?php echo $p->Id; ?>" onchange="updateCart(<?php echo $p->Id; ?>, this.value)" style="height: 40px; font-size: 0.95rem;">
                                         <div class="input-group-append">
                                             <button class="btn btn-outline-secondary btn-qty-plus py-0 px-2" type="button" onclick="changeQty(<?php echo $p->Id; ?>, 1)">+</button>
                                         </div>
                                     </div>
                                 </td>
                                 <td class="py-3 text-right">
-                                    <strong class="text-primary row-total" style="font-size: 0.95rem;"><?php echo number_format($sum); ?> VND</strong>
+                                    <strong class="row-total" style="font-size: 1rem; color: var(--primary-color);"><?php echo number_format($sum); ?> VND</strong>
                                 </td>
                                 <td class="px-3 py-3 text-center">
-                                    <a href="#" class="btn btn-light btn-sm rounded-circle" style="width: 30px; height: 30px; padding: 0; line-height: 30px;"
+                                    <a href="#" class="btn btn-light btn-sm rounded-circle" style="width: 38px; height: 38px; padding: 0; line-height: 38px;"
                                        onclick="return confirmDelete('/webbanhang/ProductController/removeFromCart/<?php echo $p->Id; ?>', 'Sản phẩm này sẽ được xóa khỏi giỏ hàng!')">
                                         <i class="fa fa-trash text-danger small"></i>
                                     </a>
@@ -72,27 +81,29 @@
                 </table>
             </div>
             <?php else: ?>
-                <div class="alert alert-info text-center m-4 border-0 shadow-sm" style="border-radius: 12px;">
-                    <i class="fa-solid fa-box-open fa-lg mr-2"></i>Giỏ hàng của bạn đang trống.
+                <div class="empty-state">
+                    <i class="fa-solid fa-box-open"></i>
+                    <h3 class="h5 font-weight-bold">Giỏ hàng đang trống</h3>
+                    <p class="mb-0">Thêm sản phẩm vào giỏ để bắt đầu thanh toán.</p>
                 </div>
             <?php endif; ?>
         </div>
     </div>
 
     <div class="d-flex justify-content-between align-items-center mt-4">
-        <a href="/webbanhang/ProductController" class="btn btn-link text-muted p-0" style="font-size: 0.9rem;">
+        <a href="/webbanhang/ProductController" class="btn btn-link p-0" style="font-size: 0.95rem;">
             <i class="fa-solid fa-arrow-left mr-2"></i>Tiếp tục mua sắm
         </a>
 
         <div class="text-right">
-            <div class="bg-white p-3 shadow-sm inline-block rounded" style="display: inline-block; min-width: 320px; border-radius: 15px;">
+            <div class="soft-panel p-3" style="display: inline-block; min-width: 340px;">
                 <div class="d-flex justify-content-between mb-2 align-items-center">
                     <span class="text-muted small">Đã chọn (<span id="selected-count">0</span> sản phẩm):</span>
-                    <h5 class="text-primary font-weight-bold mb-0" id="total-price" style="font-size: 1.1rem;">0 VND</h5>
+                    <h5 class="font-weight-bold mb-0" id="total-price" style="font-size: 1.2rem; color: var(--primary-color);">0 VND</h5>
                 </div>
                 
                 <?php if (!empty($products)): ?>
-                    <button type="button" id="btn-checkout" class="btn btn-primary btn-sm btn-block shadow py-2" style="border-radius: 10px; font-size: 0.95rem;" disabled>
+                    <button type="button" id="btn-checkout" class="btn btn-primary btn-block py-2" style="font-size: 0.98rem;" disabled>
                         MUA HÀNG <i class="fa-solid fa-arrow-right ml-2"></i>
                     </button>
                 <?php endif; ?>

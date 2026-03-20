@@ -1,17 +1,19 @@
 <?php include 'app/views/shares/header.php'; ?>
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="font-weight-bold mb-0" style="font-size: 1.5rem;">
-        <i class="fas fa-file-invoice mr-2 text-primary"></i><?php echo isAdmin() ? 'QUẢN LÝ ĐƠN HÀNG' : 'ĐƠN HÀNG CỦA TÔI'; ?>
-    </h2>
-    <span class="badge badge-primary px-3 py-2"><?php echo count($orders); ?> đơn hàng</span>
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-4 reveal-up">
+    <div>
+        <div class="section-kicker"><i class="fas fa-file-invoice"></i>Đơn hàng</div>
+        <h1 class="section-title mb-2"><?php echo isAdmin() ? 'Quản lý đơn hàng' : 'Đơn hàng của tôi'; ?></h1>
+        <p class="section-subtitle mb-0">Trạng thái, thời gian tạo và hành động đều được gom rõ ràng để dễ theo dõi hơn.</p>
+    </div>
+    <span class="badge badge-primary px-3 py-2 mt-3 mt-md-0"><?php echo count($orders); ?> đơn hàng</span>
 </div>
 
-<div class="card border-0 shadow-sm" style="border-radius: 15px;">
+<div class="surface-card reveal-up stagger-1">
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table table-hover mb-0 align-middle">
-                <thead class="bg-light text-muted small text-uppercase" style="font-size: 0.75rem;">
+                <thead>
                     <tr>
                         <th class="border-0 px-4 py-3">Mã đơn</th>
                         <th class="border-0 py-3">Khách hàng</th>

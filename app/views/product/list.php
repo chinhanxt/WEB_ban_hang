@@ -1,24 +1,47 @@
 <?php include 'app/views/shares/header.php'; ?>
 
-<h1 class="mb-4">Khám phá Sản phẩm</h1>
-
-<!-- Bộ lọc sản phẩm -->
-<div class="card mb-4 border-0 shadow-sm" style="background: #fff; border-radius: 15px;">
-    <div class="card-body p-3">
-        <form method="GET" action="/webbanhang/ProductController" class="row align-items-end gx-2">
-            <div class="col-md-3">
-                <label class="small font-weight-bold text-muted mb-1 text-uppercase" style="font-size: 0.7rem;">Tìm kiếm</label>
-                <div class="input-group input-group-sm">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text bg-light border-0" style="border-radius: 8px 0 0 8px;"><i class="fa fa-search text-primary small"></i></span>
+<div class="hero-banner reveal-up mb-4">
+    <div class="row align-items-center">
+        <div class="col-lg-8">
+            <div class="section-kicker"><i class="fa-solid fa-sparkles"></i>Bộ sưu tập công nghệ</div>
+            <h1 class="section-title text-white">Mọi chức năng mua sắm được làm lại để sáng, rõ và dễ thao tác hơn.</h1>
+            <p class="section-subtitle text-white-50 mb-0">Lọc nhanh, xem giá rõ ràng, thao tác mua hàng gọn và trực quan trên cả desktop lẫn mobile.</p>
+        </div>
+        <div class="col-lg-4 mt-4 mt-lg-0">
+            <div class="row">
+                <div class="col-6 mb-3">
+                    <div class="metric-card reveal-up stagger-1">
+                        <span class="metric-label">Sản phẩm hiện có</span>
+                        <div class="metric-value"><?php echo count($products); ?></div>
                     </div>
-                    <input type="text" name="keyword" class="form-control border-0 bg-light" style="border-radius: 0 8px 8px 0; height: 35px; font-size: 0.85rem;" value="<?php echo $_GET['keyword'] ?? ''; ?>" placeholder="Sản phẩm...">
+                </div>
+                <div class="col-6 mb-3">
+                    <div class="metric-card reveal-up stagger-2">
+                        <span class="metric-label">Danh mục</span>
+                        <div class="metric-value"><?php echo count($categories); ?></div>
+                    </div>
                 </div>
             </div>
-            <div class="col-md-2">
-                <label class="small font-weight-bold text-muted mb-1 text-uppercase" style="font-size: 0.7rem;">Danh mục</label>
-                <select name="category_id" class="form-control form-control-sm border-0 bg-light" style="border-radius: 8px; height: 35px; font-size: 0.85rem;">
-                    <option value="">Tất cả</option>
+        </div>
+    </div>
+</div>
+
+<div class="soft-panel p-4 mb-4 reveal-up stagger-1">
+    <form method="GET" action="/webbanhang/ProductController">
+        <div class="row">
+            <div class="col-lg-4 mb-3">
+                <label class="small font-weight-bold text-muted">Tìm kiếm sản phẩm</label>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text"><i class="fa fa-search"></i></span>
+                    </div>
+                    <input type="text" name="keyword" class="form-control" value="<?php echo $_GET['keyword'] ?? ''; ?>" placeholder="Nhập tên hoặc từ khóa sản phẩm">
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-2 mb-3">
+                <label class="small font-weight-bold text-muted">Danh mục</label>
+                <select name="category_id" class="form-control">
+                    <option value="">Tất cả danh mục</option>
                     <?php foreach ($categories as $cat): ?>
                         <option value="<?php echo $cat->id; ?>" <?php echo (isset($_GET['category_id']) && $_GET['category_id'] == $cat->id) ? 'selected' : ''; ?>>
                             <?php echo htmlspecialchars($cat->name); ?>
@@ -26,115 +49,100 @@
                     <?php endforeach; ?>
                 </select>
             </div>
-            <div class="col-md-2">
-                <label class="small font-weight-bold text-muted mb-1 text-uppercase" style="font-size: 0.7rem;">Giá từ</label>
-                <input type="number" name="min_price" class="form-control form-control-sm border-0 bg-light" style="border-radius: 8px; height: 35px; font-size: 0.85rem;" value="<?php echo $_GET['min_price'] ?? ''; ?>" placeholder="0">
+            <div class="col-md-4 col-lg-2 mb-3">
+                <label class="small font-weight-bold text-muted">Giá từ</label>
+                <input type="number" name="min_price" class="form-control" value="<?php echo $_GET['min_price'] ?? ''; ?>" placeholder="0">
             </div>
-            <div class="col-md-2">
-                <label class="small font-weight-bold text-muted mb-1 text-uppercase" style="font-size: 0.7rem;">Đến</label>
-                <input type="number" name="max_price" class="form-control form-control-sm border-0 bg-light" style="border-radius: 8px; height: 35px; font-size: 0.85rem;" value="<?php echo $_GET['max_price'] ?? ''; ?>" placeholder="Tối đa">
+            <div class="col-md-4 col-lg-2 mb-3">
+                <label class="small font-weight-bold text-muted">Đến</label>
+                <input type="number" name="max_price" class="form-control" value="<?php echo $_GET['max_price'] ?? ''; ?>" placeholder="Không giới hạn">
             </div>
-            <div class="col-md-3">
-                <button type="submit" class="btn btn-primary btn-sm btn-block shadow-none font-weight-bold" style="height: 35px; border-radius: 8px; font-size: 0.85rem;">
-                    <i class="fa fa-filter mr-1"></i>TÌM & LỌC
+            <div class="col-md-8 col-lg-2 mb-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary btn-block">
+                    <i class="fa fa-filter mr-2"></i>Lọc ngay
                 </button>
             </div>
-        </form>
-    </div>
+        </div>
+    </form>
 </div>
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h4 class="m-0 font-weight-bold">Danh sách công nghệ</h4>
+<div class="d-flex justify-content-between align-items-center mb-4 reveal-up stagger-2">
+    <div>
+        <div class="section-kicker"><i class="fa-solid fa-grid-2"></i>Danh sách hiển thị</div>
+        <h2 class="h3 font-weight-bold mt-3 mb-1">Chọn sản phẩm phù hợp với nhu cầu của bạn</h2>
+        <p class="text-muted mb-0">Thông tin giá, danh mục và nút thao tác được ưu tiên hiển thị rõ ràng.</p>
+    </div>
     <?php if (isAdmin()): ?>
-    <a href="/webbanhang/ProductController/add" class="btn btn-success" style="border-radius: 12px;">
+    <a href="/webbanhang/ProductController/add" class="btn btn-primary">
         <i class="fa fa-plus-circle mr-2"></i>Thêm sản phẩm
     </a>
     <?php endif; ?>
 </div>
 
-
 <div class="row">
-
-    <?php foreach ($products as $product): ?>
-
-        <div class="col-md-3 mb-4">
-
-            <div class="card h-100 border-0 shadow-sm" style="border-radius: 20px;">
-
-                <?php if ($product->Image): ?>
-                    <div style="position: relative;">
-                        <img src="/webbanhang/<?php echo $product->Image; ?>" class="card-img-top"
-                            style="height:220px; object-fit:cover;">
-                        <?php if(isset($product->category_name)): ?>
-                            <span class="badge badge-light" style="position: absolute; top: 15px; left: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-                                <?php echo htmlspecialchars($product->category_name); ?>
-                            </span>
-                        <?php endif; ?>
-                    </div>
-                <?php endif; ?>
-
-                <div class="card-body d-flex flex-column p-4">
-
-                    <h6 class="card-title mb-2">
-                        <a href="/webbanhang/ProductController/show/<?php echo $product->Id; ?>" 
-                           style="color: var(--text-dark); text-decoration: none; font-weight: 700; font-size: 1rem; transition: var(--transition);">
-                            <?php echo htmlspecialchars($product->Name); ?>
-                        </a>
-                    </h6>
-
-                    <p class="small text-muted mb-3" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; height: 38px;">
+    <?php foreach ($products as $index => $product): ?>
+        <div class="col-md-6 col-lg-3 mb-4">
+            <div class="card hover-lift reveal-up stagger-<?php echo ($index % 6) + 1; ?>">
+                <div class="position-relative">
+                    <?php if ($product->Image): ?>
+                        <img src="/webbanhang/<?php echo $product->Image; ?>" class="card-img-top" style="height: 240px; object-fit: cover;">
+                    <?php else: ?>
+                        <div class="d-flex align-items-center justify-content-center" style="height: 240px; background: linear-gradient(135deg, #f8fafc, #fff7ed);">
+                            <i class="fa-solid fa-image text-muted" style="font-size: 2.4rem;"></i>
+                        </div>
+                    <?php endif; ?>
+                    <?php if (isset($product->category_name)): ?>
+                        <span class="badge badge-primary position-absolute" style="top: 16px; left: 16px;">
+                            <?php echo htmlspecialchars($product->category_name); ?>
+                        </span>
+                    <?php endif; ?>
+                </div>
+                <div class="card-body p-4 d-flex flex-column">
+                    <a href="/webbanhang/ProductController/show/<?php echo $product->Id; ?>" class="font-weight-bold mb-2" style="color: var(--text-dark); font-size: 1.05rem; line-height: 1.5; text-decoration: none;">
+                        <?php echo htmlspecialchars($product->Name); ?>
+                    </a>
+                    <p class="text-muted mb-3" style="min-height: 48px; line-height: 1.7;">
                         <?php echo htmlspecialchars($product->Description); ?>
                     </p>
-
                     <div class="mt-auto">
-                        <p class="h5 mb-3 text-primary font-weight-bold">
-                            <?php echo number_format($product->Price); ?> <small>VND</small>
-                        </p>
-
-                        <div class="d-flex justify-content-between align-items-center gap-2">
-                            <button onclick="addToCart(<?php echo $product->Id; ?>)" class="btn btn-light btn-sm flex-fill mr-1" style="border-radius: 8px;">
-                                <i class="fa fa-cart-plus text-success"></i>
-                            </button>
-                            <a href="/webbanhang/ProductController/buyNow/<?php echo $product->Id; ?>" class="btn btn-primary btn-sm flex-fill" style="border-radius: 8px;">
-                                Mua ngay
-                            </a>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <span class="small text-muted d-block">Giá bán</span>
+                                <strong style="font-size: 1.35rem; color: var(--primary-color);"><?php echo number_format($product->Price); ?> <small>VND</small></strong>
+                            </div>
+                            <span class="status-pill success"><i class="fa-solid fa-circle-check"></i>Còn hàng</span>
                         </div>
-                        
+                        <div class="d-flex">
+                            <button onclick="addToCart(<?php echo $product->Id; ?>)" class="btn btn-light mr-2" title="Thêm vào giỏ">
+                                <i class="fa fa-cart-plus" style="color: var(--success-color);"></i>
+                            </button>
+                            <a href="/webbanhang/ProductController/buyNow/<?php echo $product->Id; ?>" class="btn btn-primary flex-fill">Mua ngay</a>
+                        </div>
                         <?php if (isAdmin()): ?>
-                        <div class="mt-2 d-flex justify-content-center">
-                            <a href="/webbanhang/ProductController/edit/<?php echo $product->Id; ?>" class="text-muted small mr-3" title="Chỉnh sửa">
-                                <i class="fa-solid fa-pen-to-square"></i> Sửa
+                        <div class="d-flex justify-content-between align-items-center mt-3 pt-3" style="border-top: 1px solid rgba(148, 163, 184, 0.14);">
+                            <a href="/webbanhang/ProductController/edit/<?php echo $product->Id; ?>" class="small font-weight-bold" style="color: var(--primary-color); text-decoration: none;">
+                                <i class="fa-solid fa-pen-to-square mr-1"></i>Sửa
                             </a>
-                            <a href="#" class="text-danger small" title="Xoá"
+                            <a href="#" class="small font-weight-bold text-danger" style="text-decoration: none;"
                                onclick="return confirmDelete('/webbanhang/ProductController/delete/<?php echo $product->Id; ?>', 'Sản phẩm này sẽ bị xóa vĩnh viễn khỏi hệ thống!')">
-                                <i class="fa-solid fa-trash"></i> Xóa
+                                <i class="fa-solid fa-trash mr-1"></i>Xóa
                             </a>
                         </div>
                         <?php endif; ?>
                     </div>
-
                 </div>
-
             </div>
-
         </div>
-
     <?php endforeach; ?>
-
 </div>
 
 <?php if (empty($products)): ?>
-    <div class="text-center py-5">
-        <i class="fa-solid fa-box-open fa-3x text-muted mb-3"></i>
-        <p class="text-muted">Không tìm thấy sản phẩm nào phù hợp.</p>
+    <div class="surface-card empty-state reveal-up">
+        <i class="fa-solid fa-box-open"></i>
+        <h3 class="h5 font-weight-bold">Không tìm thấy sản phẩm phù hợp</h3>
+        <p class="mb-0">Hãy thử đổi từ khóa tìm kiếm hoặc nới khoảng giá để xem thêm sản phẩm.</p>
     </div>
 <?php endif; ?>
-
-<style>
-    .card-title a:hover {
-        color: var(--primary-color) !important;
-    }
-</style>
 
 <script>
     function addToCart(id) {
@@ -148,7 +156,10 @@
                         text: data.message,
                         showCancelButton: true,
                         confirmButtonText: 'Đăng nhập ngay',
-                        cancelButtonText: 'Để sau'
+                        cancelButtonText: 'Để sau',
+                        confirmButtonColor: '#f97316',
+                        cancelButtonColor: '#64748b',
+                        borderRadius: '20px'
                     }).then((result) => {
                         if (result.isConfirmed) {
                             window.location.href = '/webbanhang/AuthController/login';
@@ -158,25 +169,27 @@
                 }
 
                 document.getElementById("cart-count").innerText = data.count;
-                
+
                 const Toast = Swal.mixin({
                     toast: true,
                     position: 'top-end',
                     showConfirmButton: false,
                     timer: 2000,
                     timerProgressBar: true,
+                    background: '#ffffff',
+                    borderRadius: '18px'
                 });
 
                 if (data.status === 'exists') {
                     Toast.fire({
                         icon: 'info',
-                        title: 'Sản phẩm đã có trong giỏ hàng!',
+                        title: 'Sản phẩm đã có trong giỏ hàng',
                         text: 'Số lượng đã được tăng thêm.'
                     });
                 } else {
                     Toast.fire({
                         icon: 'success',
-                        title: 'Đã thêm vào giỏ hàng!'
+                        title: 'Đã thêm vào giỏ hàng'
                     });
                 }
             });
