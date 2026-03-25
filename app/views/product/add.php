@@ -1,4 +1,5 @@
 <?php include 'app/views/shares/header.php'; ?>
+<?php $oldInput = $_SESSION['old_input'] ?? []; ?>
 
 <div class="row justify-content-center">
     <div class="col-md-8">
@@ -14,19 +15,19 @@
                         <div class="col-md-7">
                             <div class="form-group mb-3">
                                 <label class="small font-weight-bold text-muted text-uppercase">Tên sản phẩm</label>
-                                <input type="text" name="name" class="form-control" required placeholder="vd: iPhone 15 Pro Max">
+                                <input type="text" name="name" class="form-control" required placeholder="vd: iPhone 15 Pro Max" value="<?php echo htmlspecialchars($oldInput['name'] ?? ''); ?>">
                             </div>
 
                             <div class="form-group mb-3">
                                 <label class="small font-weight-bold text-muted text-uppercase">Mô tả chi tiết</label>
-                                <textarea name="description" class="form-control" rows="5" required placeholder="Nhập đặc điểm nổi bật..."></textarea>
+                                <textarea name="description" class="form-control" rows="5" required placeholder="Nhập đặc điểm nổi bật..."><?php echo htmlspecialchars($oldInput['description'] ?? ''); ?></textarea>
                             </div>
                         </div>
 
                         <div class="col-md-5">
                             <div class="form-group mb-3">
                                 <label class="small font-weight-bold text-muted text-uppercase">Giá bán (VND)</label>
-                                <input type="number" name="price" class="form-control" required placeholder="0">
+                                <input type="number" name="price" class="form-control" required placeholder="0" value="<?php echo htmlspecialchars($oldInput['price'] ?? ''); ?>">
                             </div>
 
                             <div class="form-group mb-3">
@@ -34,7 +35,9 @@
                                 <div class="input-group">
                                     <select name="category_id" class="form-control">
                                         <?php foreach ($categories as $category): ?>
-                                            <option value="<?php echo $category->id; ?>"><?php echo htmlspecialchars($category->name); ?></option>
+                                            <option value="<?php echo $category->id; ?>" <?php echo (($oldInput['category_id'] ?? '') == $category->id) ? 'selected' : ''; ?>>
+                                                <?php echo htmlspecialchars($category->name); ?>
+                                            </option>
                                         <?php endforeach; ?>
                                     </select>
                                     <div class="input-group-append">

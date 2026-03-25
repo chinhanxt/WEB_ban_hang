@@ -42,6 +42,16 @@
                         ĐĂNG NHẬP NGAY
                     </button>
                 </form>
+
+                <?php if (isGoogleAuthEnabled()): ?>
+                    <div class="auth-divider my-4">
+                        <span>hoặc</span>
+                    </div>
+                    <a href="/webbanhang/AuthController/googleRedirect" class="btn btn-google btn-block py-3 font-weight-bold d-flex align-items-center justify-content-center">
+                        <span class="google-mark mr-2">G</span>
+                        Đăng nhập bằng Google
+                    </a>
+                <?php endif; ?>
             </div>
             <div class="text-center py-4" style="background: rgba(248, 250, 252, 0.82);">
                 <p class="mb-0 small text-muted">Chưa có tài khoản? <a href="/webbanhang/AuthController/register" class="text-primary font-weight-bold">Đăng ký tại đây</a></p>
@@ -57,5 +67,60 @@
         btn.innerHTML = '<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span> Đang xử lý...';
     });
 </script>
+
+<style>
+    .auth-divider {
+        position: relative;
+        text-align: center;
+    }
+
+    .auth-divider::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: rgba(148, 163, 184, 0.24);
+    }
+
+    .auth-divider span {
+        position: relative;
+        padding: 0 12px;
+        background: rgba(255,255,255,0.92);
+        color: var(--text-muted);
+        font-size: 0.82rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 700;
+    }
+
+    .btn-google {
+        background: #ffffff;
+        color: #111827;
+        border: 1px solid rgba(148, 163, 184, 0.22);
+        box-shadow: 0 14px 28px rgba(15, 23, 42, 0.08);
+    }
+
+    .btn-google:hover,
+    .btn-google:focus {
+        color: #111827;
+        background: #f8fafc;
+        transform: translateY(-2px);
+    }
+
+    .google-mark {
+        width: 28px;
+        height: 28px;
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #4285f4, #34a853);
+        color: #fff;
+        font-weight: 800;
+        box-shadow: 0 8px 18px rgba(66, 133, 244, 0.22);
+    }
+</style>
 
 <?php include 'app/views/shares/footer.php'; ?>

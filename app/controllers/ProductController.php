@@ -106,6 +106,7 @@ class ProductController
         requireAdmin();
         $categories = (new CategoryModel($this->db))->getCategories();
         include 'app/views/product/add.php';
+        unset($_SESSION['old_input']);
     }
 
     public function edit($id)
@@ -226,8 +227,13 @@ class ProductController
         }
 
         if (!empty($errors)) {
-            $categories = (new CategoryModel($this->db))->getCategories();
-            include 'app/views/product/add.php';
+            $_SESSION['old_input'] = $_POST;
+            $_SESSION['flash_message'] = [
+                'type' => 'error',
+                'title' => 'Lỗi dữ liệu!',
+                'text' => implode(' ', $errors)
+            ];
+            header("Location: /webbanhang/ProductController/add");
             return;
         }
 
@@ -238,12 +244,35 @@ class ProductController
             $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
             if (in_array($ext, $allowed)) {
                 $target = "uploads/" . time() . "_" . $filename;
-                move_uploaded_file($_FILES['image']['tmp_name'], $target);
-                $image = $target;
+                if (move_uploaded_file($_FILES['image']['tmp_name'], $target)) {
+                    $image = $target;
+                }
+            } else {
+                $_SESSION['old_input'] = $_POST;
+                $_SESSION['flash_message'] = [
+                    'type' => 'error',
+                    'title' => 'Ảnh không hợp lệ!',
+                    'text' => 'Chỉ cho phép định dạng: jpg, jpeg, png, gif.'
+                ];
+                header("Location: /webbanhang/ProductController/add");
+                return;
             }
         }
 
-        $this->productModel->addProduct($name, $description, $price, $category_id, $image);
+        try {
+            $this->productModel->addProduct($name, $description, $price, $category_id, $image);
+        } catch (Throwable $e) {
+            $_SESSION['old_input'] = $_POST;
+            $_SESSION['flash_message'] = [
+                'type' => 'error',
+                'title' => 'Thêm sản phẩm thất bại',
+                'text' => 'Không thể lưu sản phẩm mới. Vui lòng kiểm tra lại danh mục, giá và dữ liệu nhập.'
+            ];
+            header("Location: /webbanhang/ProductController/add");
+            return;
+        }
+
+        unset($_SESSION['old_input']);
         $_SESSION['flash_message'] = [
             'type' => 'success',
             'title' => 'Hoàn tất!',
@@ -393,48 +422,120 @@ class ProductController
 
         if ($single_id) {
             $product = $this->productModel->getProductById($single_id);
+            if (!$product) {
+                $_SESSION['flash_message'] = [
+                    'type' => 'error',
+                    'title' => 'Sản phẩm không tồn tại',
+                    'text' => 'Không thể đặt hàng với sản phẩm đã bị xóa.'
+                ];
+                header("Location: /webbanhang/ProductController/cart");
+                return;
+            }
             $qty = $cart[$single_id] ?? 1;
             $total = $product->Price * $qty;
-            $order_items[] = ['id' => $single_id, 'qty' => $qty, 'price' => $product->Price];
-            if ($accountId) {
-                $this->cartModel->removeItem($accountId, (int)$single_id);
-            } else {
-                unset($_SESSION['cart'][$single_id]);
-            }
+            $order_items[] = [
+                'product_id' => (int)$single_id,
+                'product_name' => $product->Name,
+                'product_image' => $product->Image,
+                'original_price' => (float)$product->Price,
+                'sale_price' => (float)$product->Price,
+                'tax_amount' => 0,
+                'quantity' => (int)$qty,
+                'subtotal' => (float)$product->Price * (int)$qty,
+            ];
         } elseif ($selected_ids) {
             foreach ($selected_ids as $pid) {
                 if (isset($cart[$pid])) {
                     $product = $this->productModel->getProductById($pid);
+                    if (!$product) {
+                        continue;
+                    }
                     $qty = $cart[$pid];
                     $total += $product->Price * $qty;
-                    $order_items[] = ['id' => $pid, 'qty' => $qty, 'price' => $product->Price];
-                }
-            }
-
-            if ($accountId) {
-                $this->cartModel->clearSelectedItems($accountId, $selected_ids);
-            } else {
-                foreach ($selected_ids as $pid) {
-                    unset($_SESSION['cart'][$pid]);
+                    $order_items[] = [
+                        'product_id' => (int)$pid,
+                        'product_name' => $product->Name,
+                        'product_image' => $product->Image,
+                        'original_price' => (float)$product->Price,
+                        'sale_price' => (float)$product->Price,
+                        'tax_amount' => 0,
+                        'quantity' => (int)$qty,
+                        'subtotal' => (float)$product->Price * (int)$qty,
+                    ];
                 }
             }
         } else {
             foreach ($cart as $pid => $qty) {
                 $product = $this->productModel->getProductById($pid);
+                if (!$product) {
+                    continue;
+                }
                 $total += $product->Price * $qty;
-                $order_items[] = ['id' => $pid, 'qty' => $qty, 'price' => $product->Price];
-            }
-
-            if ($accountId) {
-                $this->cartModel->clearCart($accountId);
-            } else {
-                unset($_SESSION['cart']);
+                $order_items[] = [
+                    'product_id' => (int)$pid,
+                    'product_name' => $product->Name,
+                    'product_image' => $product->Image,
+                    'original_price' => (float)$product->Price,
+                    'sale_price' => (float)$product->Price,
+                    'tax_amount' => 0,
+                    'quantity' => (int)$qty,
+                    'subtotal' => (float)$product->Price * (int)$qty,
+                ];
             }
         }
 
-        $order_id = $orderModel->createOrder($total, $name, $address, $phone, $email, $payment_method, $notes);
-        foreach ($order_items as $item) {
-            $orderModel->addOrderDetail($order_id, $item['id'], $item['qty'], $item['price']);
+        if (empty($order_items)) {
+            $_SESSION['flash_message'] = [
+                'type' => 'error',
+                'title' => 'Giỏ hàng trống',
+                'text' => 'Không có sản phẩm hợp lệ để đặt hàng.'
+            ];
+            header("Location: /webbanhang/ProductController/cart");
+            return;
+        }
+
+        $orderPayload = [
+            'total' => $total,
+            'name' => $name,
+            'address' => $address,
+            'phone' => $phone,
+            'email' => $email,
+            'payment_method' => $payment_method,
+            'notes' => $notes,
+        ];
+
+        try {
+            $orderModel->createOrder($orderPayload, $order_items, $accountId);
+
+            if ($single_id) {
+                if ($accountId) {
+                    $this->cartModel->removeItem($accountId, (int)$single_id);
+                } else {
+                    unset($_SESSION['cart'][$single_id]);
+                }
+            } elseif ($selected_ids) {
+                if ($accountId) {
+                    $this->cartModel->clearSelectedItems($accountId, $selected_ids);
+                } else {
+                    foreach ($selected_ids as $pid) {
+                        unset($_SESSION['cart'][$pid]);
+                    }
+                }
+            } else {
+                if ($accountId) {
+                    $this->cartModel->clearCart($accountId);
+                } else {
+                    unset($_SESSION['cart']);
+                }
+            }
+        } catch (Throwable $e) {
+            $_SESSION['flash_message'] = [
+                'type' => 'error',
+                'title' => 'Đặt hàng thất bại',
+                'text' => $e->getMessage()
+            ];
+            header("Location: /webbanhang/ProductController/checkout");
+            return;
         }
 
         $_SESSION['flash_message'] = [

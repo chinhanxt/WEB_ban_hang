@@ -75,7 +75,7 @@ class ProductModel
 
     public function isProductInOrder($product_id)
     {
-        $query = "SELECT COUNT(*) as count FROM order_details WHERE Product_Id = :product_id";
+        $query = "SELECT COUNT(*) as count FROM order_items WHERE Product_Id = :product_id";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':product_id', $product_id);
         $stmt->execute();

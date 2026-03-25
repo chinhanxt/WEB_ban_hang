@@ -7,6 +7,48 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+function getAuthConfig() {
+    $googleClientId = getenv('GOOGLE_CLIENT_ID') ?: ($_ENV['GOOGLE_CLIENT_ID'] ?? $_SERVER['GOOGLE_CLIENT_ID'] ?? '');
+    $googleClientSecret = getenv('GOOGLE_CLIENT_SECRET') ?: ($_ENV['GOOGLE_CLIENT_SECRET'] ?? $_SERVER['GOOGLE_CLIENT_SECRET'] ?? '');
+    $googleRedirectUri = getenv('GOOGLE_REDIRECT_URI') ?: ($_ENV['GOOGLE_REDIRECT_URI'] ?? $_SERVER['GOOGLE_REDIRECT_URI'] ?? '/webbanhang/AuthController/googleCallback');
+
+    return [
+        'google' => [
+            'client_id' => $googleClientId,
+            'client_secret' => $googleClientSecret,
+            'redirect_uri' => $googleRedirectUri,
+            'scope' => 'openid email profile',
+        ],
+    ];
+}
+
+function isGoogleAuthEnabled() {
+    $config = getAuthConfig();
+    return !empty($config['google']['client_id']) && !empty($config['google']['client_secret']);
+}
+
+function buildAppUrl(string $path = ''): string {
+    $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    $normalizedPath = '/' . ltrim($path, '/');
+    return $scheme . '://' . $host . $normalizedPath;
+}
+
+function getGoogleRedirectUri(): string {
+    $config = getAuthConfig();
+    $redirectUri = trim($config['google']['redirect_uri'] ?? '');
+
+    if ($redirectUri === '') {
+        return buildAppUrl('/webbanhang/AuthController/googleCallback');
+    }
+
+    if (preg_match('/^https?:\/\//i', $redirectUri)) {
+        return $redirectUri;
+    }
+
+    return buildAppUrl($redirectUri);
+}
+
 function isLoggedIn() {
     return isset($_SESSION['user']);
 }

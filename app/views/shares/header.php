@@ -112,6 +112,7 @@
             font-weight: 600;
             padding: 10px 14px !important;
             border-radius: 12px;
+            white-space: nowrap;
         }
 
         .navbar-nav .nav-link:hover,
@@ -445,7 +446,7 @@
     <div class="page-shell">
     <nav class="navbar navbar-expand-lg sticky-top">
         <div class="container">
-            <a class="navbar-brand" href="/webbanhang/ProductController">
+            <a class="navbar-brand" href="/webbanhang/HomeController">
                 <span class="brand-mark floating-accent"><i class="fa-solid fa-bolt"></i></span>
                 <span>TECH STORE</span>
             </a>
@@ -456,6 +457,9 @@
 
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ml-auto align-items-center">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/webbanhang/HomeController">Trang chủ</a>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/webbanhang/ProductController">Sản phẩm</a>
                     </li>
