@@ -26,6 +26,40 @@ class AuthController
         exit;
     }
 
+    private function getRequestData(): array
+    {
+        $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+        if (stripos($contentType, 'application/json') === false) {
+            return $_POST;
+        }
+
+        $raw = file_get_contents('php://input');
+        $decoded = json_decode($raw, true);
+
+        return is_array($decoded) ? $decoded : [];
+    }
+
+    private function redirectToAccountList()
+    {
+        header("Location: /webbanhang/AuthController/listAccounts");
+        exit;
+    }
+
+    private function blockSelfAccountAction(int $targetAccountId, string $actionLabel): void
+    {
+        $currentUserId = isset($_SESSION['user']->id) ? (int)$_SESSION['user']->id : 0;
+        if ($currentUserId !== $targetAccountId) {
+            return;
+        }
+
+        $_SESSION['flash_message'] = [
+            'type' => 'error',
+            'title' => 'Thao tác bị từ chối',
+            'text' => 'Bạn không thể ' . $actionLabel . ' cho chính tài khoản admin đang đăng nhập.'
+        ];
+        $this->redirectToAccountList();
+    }
+
     private function createGoogleState(): string
     {
         $state = bin2hex(random_bytes(24));
@@ -158,8 +192,9 @@ class AuthController
 
     public function handleLogin()
     {
-        $email = trim($_POST['email'] ?? '');
-        $password = $_POST['password'] ?? '';
+        $data = $this->getRequestData();
+        $email = trim((string)($data['email'] ?? ''));
+        $password = (string)($data['password'] ?? '');
 
         $errors = [];
         if (empty($email)) $errors[] = "Vui lòng nhập email.";
@@ -173,6 +208,19 @@ class AuthController
                 if (!$user->is_active) {
                     $errors[] = "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Admin.";
                 } else {
+                    if (wantsJsonResponse()) {
+                        $_SESSION['user'] = $user;
+                        respondJson([
+                            'message' => 'Đăng nhập thành công.',
+                            'user' => [
+                                'id' => (int)$user->id,
+                                'username' => $user->username,
+                                'email' => $user->email,
+                                'fullname' => $user->fullname,
+                                'role' => $user->role,
+                            ],
+                        ]);
+                    }
                     $this->loginUser($user, 'Chào mừng quay trở lại!', 'Đăng nhập thành công.');
                 }
             } else {
@@ -180,7 +228,14 @@ class AuthController
             }
         }
 
-        $_SESSION['old_input'] = $_POST;
+        if (wantsJsonResponse()) {
+            respondJson([
+                'message' => 'Đăng nhập thất bại.',
+                'errors' => $errors,
+            ], 422);
+        }
+
+        $_SESSION['old_input'] = $data;
         $_SESSION['flash_message'] = [
             'type' => 'error',
             'title' => 'Đăng nhập thất bại',
@@ -201,10 +256,11 @@ class AuthController
 
     public function handleRegister()
     {
-        $username = trim($_POST['username'] ?? '');
-        $email = trim($_POST['email'] ?? '');
-        $fullname = trim($_POST['fullname'] ?? '');
-        $password = $_POST['password'] ?? '';
+        $data = $this->getRequestData();
+        $username = trim((string)($data['username'] ?? ''));
+        $email = trim((string)($data['email'] ?? ''));
+        $fullname = trim((string)($data['fullname'] ?? ''));
+        $password = (string)($data['password'] ?? '');
 
         // Tự động thêm @gmail.com nếu thiếu
         if (!empty($email) && strpos($email, '@') === false) {
@@ -249,13 +305,33 @@ class AuthController
                 unset($_SESSION['old_input']);
                 // Tự động đăng nhập sau khi đăng ký thành công
                 $user = $this->accountModel->getAccountByEmail($email);
+                if (wantsJsonResponse()) {
+                    $_SESSION['user'] = $user;
+                    respondJson([
+                        'message' => 'Tài khoản của bạn đã được tạo thành công.',
+                        'user' => [
+                            'id' => (int)$user->id,
+                            'username' => $user->username,
+                            'email' => $user->email,
+                            'fullname' => $user->fullname,
+                            'role' => $user->role,
+                        ],
+                    ], 201);
+                }
                 $this->loginUser($user, 'Chào mừng thành viên mới!', 'Tài khoản của bạn đã được tạo thành công.');
             } else {
                 $errors[] = "Có lỗi xảy ra trong quá trình lưu dữ liệu.";
             }
         }
 
-        $_SESSION['old_input'] = $_POST;
+        if (wantsJsonResponse()) {
+            respondJson([
+                'message' => 'Đăng ký thất bại.',
+                'errors' => $errors,
+            ], 422);
+        }
+
+        $_SESSION['old_input'] = $data;
         $_SESSION['flash_message'] = [
             'type' => 'error',
             'title' => 'Đăng ký thất bại',
@@ -376,39 +452,64 @@ class AuthController
     {
         requireAdmin();
         $accounts = $this->accountModel->getAccounts();
+        if (wantsJsonResponse()) {
+            respondJson([
+                'accounts' => $accounts,
+            ]);
+        }
         include 'app/views/auth/user_list.php';
     }
 
     public function toggleStatus($id, $currentStatus)
     {
         requireAdmin();
+        $this->blockSelfAccountAction((int)$id, 'khóa hoặc mở khóa');
         if ($this->accountModel->toggleActive($id, $currentStatus)) {
+            if (wantsJsonResponse()) {
+                respondJson([
+                    'message' => 'Trạng thái tài khoản đã được cập nhật.',
+                    'account_id' => (int)$id,
+                ]);
+            }
             $_SESSION['flash_message'] = [
                 'type' => 'success',
                 'title' => 'Thành công!',
                 'text' => 'Trạng thái tài khoản đã được cập nhật.'
             ];
         }
-        header("Location: /webbanhang/AuthController/listAccounts");
+        $this->redirectToAccountList();
     }
 
     public function resetUserPassword($id)
     {
         requireAdmin();
+        $this->blockSelfAccountAction((int)$id, 'đặt lại mật khẩu');
         if ($this->accountModel->resetPassword($id, 'User@123')) {
+            if (wantsJsonResponse()) {
+                respondJson([
+                    'message' => 'Mật khẩu đã được đặt về mặc định.',
+                    'account_id' => (int)$id,
+                    'default_password' => 'User@123',
+                ]);
+            }
             $_SESSION['flash_message'] = [
                 'type' => 'success',
                 'title' => 'Đã đặt lại!',
                 'text' => 'Mật khẩu đã được đặt về mặc định: User@123'
             ];
         }
-        header("Location: /webbanhang/AuthController/listAccounts");
+        $this->redirectToAccountList();
     }
 
     public function logout()
     {
         session_destroy();
         session_start();
+        if (wantsJsonResponse()) {
+            respondJson([
+                'message' => 'Bạn đã đăng xuất thành công.'
+            ]);
+        }
         $_SESSION['flash_message'] = [
             'type' => 'success',
             'title' => 'Hẹn gặp lại!',

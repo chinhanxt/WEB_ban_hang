@@ -82,6 +82,19 @@ class ProductController
         return count($this->getCartMap());
     }
 
+    private function getRequestData(): array
+    {
+        $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+        if (stripos($contentType, 'application/json') === false) {
+            return $_POST;
+        }
+
+        $raw = file_get_contents('php://input');
+        $decoded = json_decode($raw, true);
+
+        return is_array($decoded) ? $decoded : [];
+    }
+
     public function index()
     {
         $limit = 8;
@@ -98,6 +111,19 @@ class ProductController
 
         $categories = (new CategoryModel($this->db))->getCategories();
 
+        if (wantsJsonResponse()) {
+            respondJson([
+                'products' => $products,
+                'categories' => $categories,
+                'pagination' => [
+                    'page' => (int)$page,
+                    'limit' => (int)$limit,
+                    'total_products' => (int)$totalProducts,
+                    'total_pages' => (int)$totalPages,
+                ],
+            ]);
+        }
+
         include 'app/views/product/list.php';
     }
 
@@ -105,6 +131,12 @@ class ProductController
     {
         requireAdmin();
         $categories = (new CategoryModel($this->db))->getCategories();
+        if (wantsJsonResponse()) {
+            respondJson([
+                'message' => 'Dữ liệu form thêm sản phẩm.',
+                'categories' => $categories,
+            ]);
+        }
         include 'app/views/product/add.php';
         unset($_SESSION['old_input']);
     }
@@ -120,6 +152,13 @@ class ProductController
 
         $categories = (new CategoryModel($this->db))->getCategories();
 
+        if (wantsJsonResponse()) {
+            respondJson([
+                'product' => $product,
+                'categories' => $categories,
+            ]);
+        }
+
         include 'app/views/product/edit.php';
 
     }
@@ -130,37 +169,54 @@ class ProductController
     //     var_dump($product);
     //     exit;
     // }
-    public function update()
+    public function update($id = null)
     {
         requireAdmin();
-        $id = $_POST['id'];
-        $name = trim($_POST['name']);
-        $description = trim($_POST['description']);
-        $price = $_POST['price'];
-        $category_id = $_POST['category_id'];
+        $data = $this->getRequestData();
+        $id = (int)($id ?? $data['id'] ?? 0);
+        $name = trim((string)($data['name'] ?? ''));
+        $description = trim((string)($data['description'] ?? ''));
+        $price = $data['price'] ?? null;
+        $category_id = $data['category_id'] ?? null;
 
         $errors = [];
+        if ($id <= 0) $errors[] = "ID sản phẩm không hợp lệ.";
         if (strlen($name) < 10) $errors[] = "Tên sản phẩm phải có ít nhất 10 ký tự.";
         if (!is_numeric($price) || $price <= 0) $errors[] = "Giá sản phẩm phải là số dương.";
         if (empty($description)) $errors[] = "Mô tả sản phẩm không được để trống.";
 
         if (!empty($errors)) {
+            if (wantsJsonResponse()) {
+                respondJson([
+                    'message' => 'Dữ liệu cập nhật không hợp lệ.',
+                    'errors' => $errors,
+                ], 422);
+            }
             $_SESSION['flash_message'] = [
                 'type' => 'error',
                 'title' => 'Lỗi dữ liệu!',
                 'text' => implode('<br>', $errors)
             ];
-            header("Location: /webbanhang/ProductController/edit/" . $id);
+            if ($id > 0) {
+                header("Location: /webbanhang/ProductController/edit/" . $id);
+            } else {
+                header("Location: /webbanhang/ProductController");
+            }
             return;
         }
 
-        $image = $_POST['old_image'];
+        $image = (string)($data['old_image'] ?? '');
 
         if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
             $allowed = ['jpg', 'jpeg', 'png', 'gif'];
             $filename = $_FILES['image']['name'];
             $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
             if (!in_array($ext, $allowed)) {
+                if (wantsJsonResponse()) {
+                    respondJson([
+                        'message' => 'Ảnh không hợp lệ. Chỉ cho phép định dạng: jpg, jpeg, png, gif.',
+                    ], 422);
+                }
                 $_SESSION['flash_message'] = [
                     'type' => 'error',
                     'title' => 'Ảnh không hợp lệ!',
@@ -176,6 +232,14 @@ class ProductController
         }
 
         $this->productModel->updateProduct($id, $name, $description, $price, $category_id, $image);
+        $updatedProduct = $this->productModel->getProductById($id);
+
+        if (wantsJsonResponse()) {
+            respondJson([
+                'message' => 'Cập nhật sản phẩm thành công.',
+                'product' => $updatedProduct,
+            ]);
+        }
         $_SESSION['flash_message'] = [
             'type' => 'success',
             'title' => 'Cập nhật thành công!',
@@ -188,6 +252,11 @@ class ProductController
     {
         requireAdmin();
         if ($this->productModel->isProductInOrder($id)) {
+            if (wantsJsonResponse()) {
+                respondJson([
+                    'message' => 'Không thể xóa! Sản phẩm này đang có trong các đơn hàng hiện tại.'
+                ], 409);
+            }
             $_SESSION['flash_message'] = [
                 'type' => 'error',
                 'title' => 'Lỗi ràng buộc!',
@@ -198,6 +267,12 @@ class ProductController
         }
         
         $this->productModel->deleteProduct($id);
+        if (wantsJsonResponse()) {
+            respondJson([
+                'message' => 'Sản phẩm đã được xóa khỏi hệ thống.',
+                'deleted_id' => (int)$id,
+            ]);
+        }
         $_SESSION['flash_message'] = [
             'type' => 'success',
             'title' => 'Thành công!',
@@ -210,10 +285,11 @@ class ProductController
     public function save()
     {
         requireAdmin();
-        $name = trim($_POST['name']);
-        $description = trim($_POST['description']);
-        $price = $_POST['price'];
-        $category_id = $_POST['category_id'];
+        $data = $this->getRequestData();
+        $name = trim((string)($data['name'] ?? ''));
+        $description = trim((string)($data['description'] ?? ''));
+        $price = $data['price'] ?? null;
+        $category_id = $data['category_id'] ?? null;
 
         $errors = [];
         if (strlen($name) < 10) {
@@ -227,7 +303,13 @@ class ProductController
         }
 
         if (!empty($errors)) {
-            $_SESSION['old_input'] = $_POST;
+            if (wantsJsonResponse()) {
+                respondJson([
+                    'message' => 'Dữ liệu tạo sản phẩm không hợp lệ.',
+                    'errors' => $errors,
+                ], 422);
+            }
+            $_SESSION['old_input'] = $data;
             $_SESSION['flash_message'] = [
                 'type' => 'error',
                 'title' => 'Lỗi dữ liệu!',
@@ -248,7 +330,12 @@ class ProductController
                     $image = $target;
                 }
             } else {
-                $_SESSION['old_input'] = $_POST;
+                if (wantsJsonResponse()) {
+                    respondJson([
+                        'message' => 'Ảnh không hợp lệ. Chỉ cho phép định dạng: jpg, jpeg, png, gif.',
+                    ], 422);
+                }
+                $_SESSION['old_input'] = $data;
                 $_SESSION['flash_message'] = [
                     'type' => 'error',
                     'title' => 'Ảnh không hợp lệ!',
@@ -262,7 +349,12 @@ class ProductController
         try {
             $this->productModel->addProduct($name, $description, $price, $category_id, $image);
         } catch (Throwable $e) {
-            $_SESSION['old_input'] = $_POST;
+            if (wantsJsonResponse()) {
+                respondJson([
+                    'message' => 'Không thể lưu sản phẩm mới. Vui lòng kiểm tra lại danh mục, giá và dữ liệu nhập.'
+                ], 400);
+            }
+            $_SESSION['old_input'] = $data;
             $_SESSION['flash_message'] = [
                 'type' => 'error',
                 'title' => 'Thêm sản phẩm thất bại',
@@ -270,6 +362,16 @@ class ProductController
             ];
             header("Location: /webbanhang/ProductController/add");
             return;
+        }
+
+        $createdProducts = $this->productModel->search($name);
+        $createdProduct = !empty($createdProducts) ? $createdProducts[0] : null;
+
+        if (wantsJsonResponse()) {
+            respondJson([
+                'message' => 'Sản phẩm mới đã được thêm thành công.',
+                'product' => $createdProduct,
+            ], 201);
         }
 
         unset($_SESSION['old_input']);
@@ -289,6 +391,13 @@ class ProductController
 
         $totalPages = 1;
 
+        if (wantsJsonResponse()) {
+            respondJson([
+                'keyword' => $keyword,
+                'products' => $products,
+            ]);
+        }
+
         include 'app/views/product/list.php';
     }
 
@@ -297,7 +406,14 @@ class ProductController
         $product = $this->productModel->getProductById($id);
 
         if (!$product) {
+            if (wantsJsonResponse()) {
+                respondJson(['message' => 'Không tìm thấy sản phẩm'], 404);
+            }
             die("Không tìm thấy sản phẩm");
+        }
+
+        if (wantsJsonResponse()) {
+            respondJson(['product' => $product]);
         }
 
         include 'app/views/product/show.php';

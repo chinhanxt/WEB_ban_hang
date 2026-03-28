@@ -128,6 +128,15 @@ class OrderController
             }));
         }
 
+        if (wantsJsonResponse()) {
+            respondJson([
+                'orders' => $orders,
+                'tabs' => $tabs,
+                'selected_status' => $selectedStatus,
+                'selected_customer_id' => $selectedCustomerId,
+            ]);
+        }
+
         include 'app/views/order/list.php';
     }
 
@@ -145,6 +154,13 @@ class OrderController
                     return $order['Phone'] === $phone;
                 }));
             }
+        }
+
+        if (wantsJsonResponse()) {
+            respondJson([
+                'orders' => $orders,
+                'phone' => $phone,
+            ]);
         }
 
         include 'app/views/order/history.php';
@@ -171,6 +187,15 @@ class OrderController
         $logs = $this->orderModel->getOrderLogs((int)$id);
         $returnRequest = $this->orderModel->getLatestReturnRequest((int)$id);
         $reviews = $this->orderModel->getReviewsByOrder((int)$id);
+        if (wantsJsonResponse()) {
+            respondJson([
+                'order' => $order,
+                'details' => $details,
+                'logs' => $logs,
+                'return_request' => $returnRequest,
+                'reviews' => $reviews,
+            ]);
+        }
         include 'app/views/order/details.php';
     }
 
@@ -188,12 +213,23 @@ class OrderController
 
         try {
             $updated = $this->orderModel->transitionOrderStatus($orderId, $status, $this->getCurrentUserId(), $reason);
+            if (wantsJsonResponse()) {
+                respondJson([
+                    'message' => 'Cập nhật trạng thái đơn hàng thành công.',
+                    'order' => $updated,
+                ]);
+            }
             $_SESSION['flash_message'] = [
                 'type' => 'success',
                 'title' => 'Cập nhật!',
                 'text' => 'Đơn hàng #' . $orderId . ' đã chuyển sang ' . $updated['status'] . '.'
             ];
         } catch (Throwable $e) {
+            if (wantsJsonResponse()) {
+                respondJson([
+                    'message' => $e->getMessage(),
+                ], 400);
+            }
             $_SESSION['flash_message'] = [
                 'type' => 'error',
                 'title' => 'Không thể cập nhật',
@@ -216,13 +252,24 @@ class OrderController
         $reason = trim($_POST['reason'] ?? '');
 
         try {
-            $this->orderModel->updatePaymentStatus($orderId, $paymentStatus, $this->getCurrentUserId(), $reason);
+            $order = $this->orderModel->updatePaymentStatus($orderId, $paymentStatus, $this->getCurrentUserId(), $reason);
+            if (wantsJsonResponse()) {
+                respondJson([
+                    'message' => 'Trạng thái thanh toán đã được lưu.',
+                    'order' => $order,
+                ]);
+            }
             $_SESSION['flash_message'] = [
                 'type' => 'success',
                 'title' => 'Đã cập nhật thanh toán',
                 'text' => 'Trạng thái thanh toán đã được lưu.'
             ];
         } catch (Throwable $e) {
+            if (wantsJsonResponse()) {
+                respondJson([
+                    'message' => $e->getMessage(),
+                ], 400);
+            }
             $_SESSION['flash_message'] = [
                 'type' => 'error',
                 'title' => 'Cập nhật thất bại',
@@ -242,13 +289,24 @@ class OrderController
         $estimatedDelivery = trim($_POST['estimated_delivery'] ?? '');
 
         try {
-            $this->orderModel->updateShippingInfo($orderId, $carrier, $trackingCode, $estimatedDelivery, $this->getCurrentUserId());
+            $order = $this->orderModel->updateShippingInfo($orderId, $carrier, $trackingCode, $estimatedDelivery, $this->getCurrentUserId());
+            if (wantsJsonResponse()) {
+                respondJson([
+                    'message' => 'Thông tin giao hàng đã được lưu.',
+                    'order' => $order,
+                ]);
+            }
             $_SESSION['flash_message'] = [
                 'type' => 'success',
                 'title' => 'Đã cập nhật vận chuyển',
                 'text' => 'Thông tin giao hàng đã được lưu.'
             ];
         } catch (Throwable $e) {
+            if (wantsJsonResponse()) {
+                respondJson([
+                    'message' => $e->getMessage(),
+                ], 400);
+            }
             $_SESSION['flash_message'] = [
                 'type' => 'error',
                 'title' => 'Không thể lưu vận chuyển',
@@ -266,13 +324,24 @@ class OrderController
         $reason = trim($_POST['reason'] ?? '');
 
         try {
-            $this->orderModel->cancelOrderByUser($orderId, $this->getCurrentUserId(), $reason);
+            $order = $this->orderModel->cancelOrderByUser($orderId, $this->getCurrentUserId(), $reason);
+            if (wantsJsonResponse()) {
+                respondJson([
+                    'message' => 'Đơn hàng đã được hủy theo yêu cầu của bạn.',
+                    'order' => $order,
+                ]);
+            }
             $_SESSION['flash_message'] = [
                 'type' => 'success',
                 'title' => 'Đã hủy đơn',
                 'text' => 'Đơn hàng đã được hủy theo yêu cầu của bạn.'
             ];
         } catch (Throwable $e) {
+            if (wantsJsonResponse()) {
+                respondJson([
+                    'message' => $e->getMessage(),
+                ], 400);
+            }
             $_SESSION['flash_message'] = [
                 'type' => 'error',
                 'title' => 'Không thể hủy đơn',
@@ -289,13 +358,24 @@ class OrderController
         $orderId = (int)($_POST['order_id'] ?? 0);
 
         try {
-            $this->orderModel->confirmCompletedByUser($orderId, $this->getCurrentUserId());
+            $order = $this->orderModel->confirmCompletedByUser($orderId, $this->getCurrentUserId());
+            if (wantsJsonResponse()) {
+                respondJson([
+                    'message' => 'Cảm ơn bạn đã xác nhận hoàn tất đơn hàng.',
+                    'order' => $order,
+                ]);
+            }
             $_SESSION['flash_message'] = [
                 'type' => 'success',
                 'title' => 'Đã xác nhận',
                 'text' => 'Cảm ơn bạn đã xác nhận hoàn tất đơn hàng.'
             ];
         } catch (Throwable $e) {
+            if (wantsJsonResponse()) {
+                respondJson([
+                    'message' => $e->getMessage(),
+                ], 400);
+            }
             $_SESSION['flash_message'] = [
                 'type' => 'error',
                 'title' => 'Không thể xác nhận',
@@ -333,13 +413,24 @@ class OrderController
                 throw new RuntimeException('Vui lòng nhập lý do và tải lên ít nhất một ảnh/video minh chứng.');
             }
 
-            $this->orderModel->requestReturn($orderId, $this->getCurrentUserId(), $reason, $evidencePaths);
+            $returnRequest = $this->orderModel->requestReturn($orderId, $this->getCurrentUserId(), $reason, $evidencePaths);
+            if (wantsJsonResponse()) {
+                respondJson([
+                    'message' => 'Yêu cầu trả hàng/hoàn tiền của bạn đã được ghi nhận.',
+                    'return_request' => $returnRequest,
+                ]);
+            }
             $_SESSION['flash_message'] = [
                 'type' => 'success',
                 'title' => 'Đã gửi yêu cầu',
                 'text' => 'Yêu cầu trả hàng/hoàn tiền của bạn đã được ghi nhận.'
             ];
         } catch (Throwable $e) {
+            if (wantsJsonResponse()) {
+                respondJson([
+                    'message' => $e->getMessage(),
+                ], 400);
+            }
             $_SESSION['flash_message'] = [
                 'type' => 'error',
                 'title' => 'Không thể gửi yêu cầu',
@@ -359,6 +450,12 @@ class OrderController
 
         try {
             $returnRequest = $this->orderModel->reviewReturnRequest($returnRequestId, $approved, $this->getCurrentUserId(), $note);
+            if (wantsJsonResponse()) {
+                respondJson([
+                    'message' => 'Yêu cầu trả hàng đã được cập nhật.',
+                    'return_request' => $returnRequest,
+                ]);
+            }
             $_SESSION['flash_message'] = [
                 'type' => 'success',
                 'title' => 'Đã xử lý yêu cầu',
@@ -366,6 +463,11 @@ class OrderController
             ];
             $this->redirectBackToDetails((int)$returnRequest['Order_Id']);
         } catch (Throwable $e) {
+            if (wantsJsonResponse()) {
+                respondJson([
+                    'message' => $e->getMessage(),
+                ], 400);
+            }
             $_SESSION['flash_message'] = [
                 'type' => 'error',
                 'title' => 'Xử lý thất bại',
@@ -383,6 +485,12 @@ class OrderController
 
         try {
             $returnRequest = $this->orderModel->markReturnedReceived($returnRequestId, $this->getCurrentUserId());
+            if (wantsJsonResponse()) {
+                respondJson([
+                    'message' => 'Đơn hoàn trả đã chuyển sang bước nhận hàng.',
+                    'return_request' => $returnRequest,
+                ]);
+            }
             $_SESSION['flash_message'] = [
                 'type' => 'success',
                 'title' => 'Đã nhận hàng trả',
@@ -390,6 +498,11 @@ class OrderController
             ];
             $this->redirectBackToDetails((int)$returnRequest['Order_Id']);
         } catch (Throwable $e) {
+            if (wantsJsonResponse()) {
+                respondJson([
+                    'message' => $e->getMessage(),
+                ], 400);
+            }
             $_SESSION['flash_message'] = [
                 'type' => 'error',
                 'title' => 'Không thể cập nhật',
@@ -408,6 +521,12 @@ class OrderController
 
         try {
             $returnRequest = $this->orderModel->refundReturnRequest($returnRequestId, $this->getCurrentUserId(), $reason);
+            if (wantsJsonResponse()) {
+                respondJson([
+                    'message' => 'Đơn trả hàng đã được hoàn tiền.',
+                    'return_request' => $returnRequest,
+                ]);
+            }
             $_SESSION['flash_message'] = [
                 'type' => 'success',
                 'title' => 'Hoàn tiền thành công',
@@ -415,6 +534,11 @@ class OrderController
             ];
             $this->redirectBackToDetails((int)$returnRequest['Order_Id']);
         } catch (Throwable $e) {
+            if (wantsJsonResponse()) {
+                respondJson([
+                    'message' => $e->getMessage(),
+                ], 400);
+            }
             $_SESSION['flash_message'] = [
                 'type' => 'error',
                 'title' => 'Hoàn tiền thất bại',
@@ -439,12 +563,24 @@ class OrderController
             }
 
             $this->orderModel->addReview($orderId, $orderItemId, $this->getCurrentUserId(), $rating, $content);
+            if (wantsJsonResponse()) {
+                respondJson([
+                    'message' => 'Cảm ơn bạn đã chia sẻ nhận xét về sản phẩm.',
+                    'order_id' => $orderId,
+                    'order_item_id' => $orderItemId,
+                ], 201);
+            }
             $_SESSION['flash_message'] = [
                 'type' => 'success',
                 'title' => 'Đã gửi đánh giá',
                 'text' => 'Cảm ơn bạn đã chia sẻ nhận xét về sản phẩm.'
             ];
         } catch (Throwable $e) {
+            if (wantsJsonResponse()) {
+                respondJson([
+                    'message' => $e->getMessage(),
+                ], 400);
+            }
             $_SESSION['flash_message'] = [
                 'type' => 'error',
                 'title' => 'Không thể gửi đánh giá',
@@ -485,6 +621,12 @@ class OrderController
     {
         requireAdmin();
         $this->orderModel->deleteOrder((int)$id);
+        if (wantsJsonResponse()) {
+            respondJson([
+                'message' => 'Đơn hàng đã được loại bỏ khỏi hệ thống.',
+                'deleted_id' => (int)$id,
+            ]);
+        }
         $_SESSION['flash_message'] = [
             'type' => 'success',
             'title' => 'Đã xóa!',

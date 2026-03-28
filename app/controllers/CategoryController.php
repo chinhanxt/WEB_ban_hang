@@ -15,11 +15,21 @@ class CategoryController
 
     public function list(){
         $categories = $this->categoryModel->getCategories();
+        if (wantsJsonResponse()) {
+            respondJson([
+                'categories' => $categories,
+            ]);
+        }
         include 'app/views/category/list.php';
     }
 
     public function add(){
         requireAdmin();
+        if (wantsJsonResponse()) {
+            respondJson([
+                'message' => 'Dữ liệu form thêm danh mục.',
+            ]);
+        }
         include 'app/views/category/add.php';
     }
 
@@ -30,6 +40,11 @@ class CategoryController
             $description = trim($_POST['description']);
             
             if (empty($name)) {
+                if (wantsJsonResponse()) {
+                    respondJson([
+                        'message' => 'Tên danh mục không được để trống.'
+                    ], 422);
+                }
                 $_SESSION['flash_message'] = [
                     'type' => 'error',
                     'title' => 'Lỗi!',
@@ -40,6 +55,15 @@ class CategoryController
             }
 
             $this->categoryModel->addCategory($name, $description);
+            if (wantsJsonResponse()) {
+                respondJson([
+                    'message' => 'Danh mục mới đã được tạo.',
+                    'category' => [
+                        'name' => $name,
+                        'description' => $description,
+                    ],
+                ], 201);
+            }
             $_SESSION['flash_message'] = [
                 'type' => 'success',
                 'title' => 'Thành công!',
